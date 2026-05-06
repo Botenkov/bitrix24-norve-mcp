@@ -19,7 +19,23 @@ const TOOLS = [
   { name: "norve_validate", description: "Validate connection to Bitrix24 NORVE", inputSchema: { type: "object", properties: {} } },
   { name: "norve_task_create", description: "Create a task in Bitrix24 NORVE", inputSchema: { type: "object", required: ["title"], properties: { title: { type: "string" }, description: { type: "string" }, responsibleId: { type: "number" }, deadline: { type: "string" }, priority: { type: "string", enum: ["0","1","2"] } } } },
   { name: "norve_task_list", description: "List tasks in Bitrix24 NORVE", inputSchema: { type: "object", properties: { limit: { type: "number" }, responsibleId: { type: "number" } } } },
-  { name: "norve_task_update", description: "Update a task in Bitrix24 NORVE", inputSchema: { type: "object", required: ["taskId"], properties: { taskId: { type: "number" }, title: { type: "string" }, status: { type: "string" }, deadline: { type: "string" } } } },
+  {
+    name: "norve_task_update",
+    description: "Update a task in Bitrix24 NORVE (title, status, deadline, auditors, responsible)",
+    inputSchema: {
+      type: "object",
+      required: ["taskId"],
+      properties: {
+        taskId:        { type: "number", description: "ID задачи" },
+        title:         { type: "string", description: "Новое название" },
+        status:        { type: "string", description: "Статус задачи" },
+        deadline:      { type: "string", description: "Дедлайн ISO8601" },
+        responsibleId: { type: "number", description: "ID ответственного" },
+        description:   { type: "string", description: "Описание задачи" },
+        auditors:      { type: "array", items: { type: "number" }, description: "Массив ID наблюдателей" },
+      }
+    }
+  },
   { name: "norve_deal_create", description: "Create a deal in Bitrix24 NORVE CRM", inputSchema: { type: "object", required: ["title"], properties: { title: { type: "string" }, stageId: { type: "string" }, amount: { type: "string" }, currency: { type: "string" }, contactId: { type: "number" } } } },
   { name: "norve_deal_list", description: "List deals in Bitrix24 NORVE CRM", inputSchema: { type: "object", properties: { limit: { type: "number" }, stageId: { type: "string" } } } },
   { name: "norve_deal_update", description: "Update a deal in Bitrix24 NORVE CRM", inputSchema: { type: "object", required: ["dealId"], properties: { dealId: { type: "number" }, stageId: { type: "string" }, amount: { type: "string" }, title: { type: "string" } } } },
@@ -46,9 +62,12 @@ async function executeTool(name, args = {}) {
     }
     case "norve_task_update": {
       const fields = {};
-      if (args.title) fields.TITLE = args.title;
-      if (args.status) fields.STATUS = args.status;
-      if (args.deadline) fields.DEADLINE = args.deadline;
+      if (args.title)         fields.TITLE          = args.title;
+      if (args.status)        fields.STATUS         = args.status;
+      if (args.deadline)      fields.DEADLINE       = args.deadline;
+      if (args.responsibleId) fields.RESPONSIBLE_ID = args.responsibleId;
+      if (args.description)   fields.DESCRIPTION    = args.description;
+      if (args.auditors)      fields.AUDITORS       = args.auditors;
       return await bx("tasks.task.update", { taskId: args.taskId, fields });
     }
     case "norve_deal_create": {
