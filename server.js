@@ -245,7 +245,7 @@ async function handleMCP(message) {
     return {
       jsonrpc: "2.0", id,
       result: {
-        protocolVersion: "2024-11-05",
+        protocolVersion: "2025-11-25",
         capabilities: { tools: {} },
         serverInfo: { name: "bitrix24-norve", version: "1.0.0" },
       },
@@ -328,6 +328,8 @@ app.post("/messages", async (req, res) => {
 });
 
 // Health check
+app.get("/", (_, res) => res.json({ status: "ok", server: "bitrix24-norve-mcp" }));
+
 app.get("/health", (_, res) => res.json({ status: "ok", server: "bitrix24-norve-mcp" }));
 
 app.options("*", (req, res) => {
